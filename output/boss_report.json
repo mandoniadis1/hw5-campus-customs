@@ -1,0 +1,70 @@
+{
+  "date_today": "2026-08-31",
+  "cash_plan": [
+    "Invoice 501, Bulldog Print Co: $840 paid (approval queue #1); checking after payment: $2,560, calculated from initial checking of $3,400 (get_cash_balance).",
+    "Rent, lease 1: $2,400 paid (approval queue #2); checking after payment: $160. Current checking is $160 with no pending approvals (get_cash_balance); the paid queue entries total $3,240 (list_approval_queue, all)."
+  ],
+  "tickets": [
+    {
+      "ticket_id": 101,
+      "decision": "Keep open while waiting for Tauhid to say whether they want to wait. No tee is in stock and no restock order is confirmed; invoice 501 is already paid, so no new payment was queued.",
+      "numbers": [
+        "Requested quantity: 1, CC-TEE-WHITE size S (list_open_tickets).",
+        "Stock: 0; shortfall: 1 (Inventory).",
+        "Invoice 501: $840, paid; approval queue #1 (list_approval_queue, all; Accounting).",
+        "Earliest possible arrival is 2026-09-05 if ordered today; this is an estimate, not a confirmed order (Inventory)."
+      ],
+      "approvals_needed": [],
+      "customer_draft": "DRAFT - NOT SENT\nHi Tauhid, we estimate the size S white tee could arrive as early as September 5, 2026, if ordered today, but no restock order has been confirmed. Would you like to wait?",
+      "agents_consulted": [
+        "Inventory",
+        "Accounting",
+        "Customer Service"
+      ],
+      "status": "open",
+      "still_needed": [
+        "Tauhid's response on whether to wait; no restock order is confirmed."
+      ]
+    },
+    {
+      "ticket_id": 102,
+      "decision": "Resolve: the $2,400 rent payment is paid, so nothing remains for the shop or a person to do on this ticket.",
+      "numbers": [
+        "Shop date: 2026-08-31 (list_open_tickets).",
+        "Lease 1 rent: $2,400 due 2026-09-02, not overdue (Facilities).",
+        "Rent payment: $2,400, approval queue #2, status paid (list_approval_queue, all; Accounting)."
+      ],
+      "approvals_needed": [],
+      "customer_draft": null,
+      "agents_consulted": [
+        "Facilities",
+        "Accounting"
+      ],
+      "status": "resolved",
+      "still_needed": []
+    },
+    {
+      "ticket_id": 103,
+      "decision": "Keep open while Yale AI Club approves the selected $50 unit price and chooses whether to take 8 available now with 12 later or wait. No restock order is confirmed and no payment was queued.",
+      "numbers": [
+        "Requested quantity: 20 CC-HOOD-NAVY size M (list_open_tickets).",
+        "Stock: 8 available; shortfall: 12 (Inventory).",
+        "List price: $58 each; unit cost: $22 (Inventory; Accounting).",
+        "Selected price: $50 each, $28 margin per unit and $560 total margin on 20 (calculated from Inventory's cost/list price figures).",
+        "Possible restock arrival: 2026-09-05 if ordered today; not confirmed (Inventory)."
+      ],
+      "approvals_needed": [],
+      "customer_draft": "DRAFT - NOT SENT\nHi Yale AI Club,\n\nWe can offer the 20 CC-HOOD-NAVY hoodies in size M at $50 each. We have 8 available now; the remaining 12 could arrive as early as September 5 if ordered today, but that restock isn’t confirmed. Would you approve the $50 price, and would you prefer 8 now with the other 12 later, or to wait for all 20?\n\nThanks!",
+      "agents_consulted": [
+        "Inventory",
+        "Accounting",
+        "Customer Service"
+      ],
+      "status": "open",
+      "still_needed": [
+        "Yale AI Club's approval of $50 per hoodie and its choice between 8 now plus 12 later or waiting; no restock order is confirmed."
+      ]
+    }
+  ],
+  "missing_info": []
+}

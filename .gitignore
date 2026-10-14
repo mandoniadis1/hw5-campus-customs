@@ -1,0 +1,23 @@
+# secrets: never commit the real key
+.env
+.env.*
+!.env.example
+
+# environments / builds
+.venv/
+**/.venv/
+node_modules/
+**/node_modules/
+dist/
+__pycache__/
+*.pyc
+
+# local run noise
+*.log
+output/*.lock
+output/*.tmp
+*.json.tmp
+.DS_Store
+
+# the original course download (its contents are in data/)
+*.zip

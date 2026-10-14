@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campus Customs · Ticket Desk Plan</title>
+<style>
+  :root {
+    /* Yale palette, matching hw4's Campus Customs site */
+    --bg: #050a14; --panel: #0f1a30; --panel2: #13213d; --line: #233559; --ink: #f1f5ff; --muted: #9fb0cc;
+    --navy: #00356b; --navy-mid: #0f4d92; --yale: #286dc0; --sky: #63a4ff; --ice: #bcd6ff;
+    --ok: #5fd39a; --warn: #f0b54a; --danger: #ff6b7a; /* status meaning only */
+    --navy-gradient: linear-gradient(90deg, var(--navy), var(--yale));
+    --navy-text: linear-gradient(90deg, var(--sky), var(--ice));
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: radial-gradient(ellipse at 15% -10%, rgba(40, 109, 192, 0.22), transparent 45%),
+      radial-gradient(ellipse at 90% 0%, rgba(0, 53, 107, 0.35), transparent 40%), var(--bg);
+    color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; min-height: 100vh;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+  header .kicker { letter-spacing: 0.16em; text-transform: uppercase; font-size: 12px; color: var(--sky); }
+  header h1 { margin: 4px 0 6px; font-size: 32px; }
+  header h1 span { background: var(--navy-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header p { margin: 0; color: var(--muted); max-width: 760px; }
+  .accent-bar { height: 3px; background: var(--navy-gradient); border-radius: 3px; margin: 18px 0 20px; }
+
+  [role="tablist"] { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  [role="tab"] {
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 9px 16px;
+    border-radius: 999px; font: inherit; font-weight: 700; cursor: pointer; display: flex; gap: 8px; align-items: center;
+  }
+  [role="tab"] .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--muted)); box-shadow: 0 0 8px var(--c, transparent); }
+  [role="tab"][aria-selected="true"] { border-color: var(--c, var(--ink)); box-shadow: 0 0 0 1px var(--c, var(--ink)), 0 0 18px color-mix(in srgb, var(--c, #fff) 35%, transparent); }
+  [role="tab"].later { color: var(--muted); font-weight: 600; }
+  [role="tab"]:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+  [role="tabpanel"][hidden] { display: none; }
+
+  .grid { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 10px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .ticket-card { border-top: 3px solid var(--c); }
+  .ticket-card .id { font-size: 30px; font-weight: 800; color: var(--c); line-height: 1; }
+  .ticket-card .type { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--muted); }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0 0; font-size: 14px; }
+  dt { color: var(--muted); } dd { margin: 0; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 0.88em; background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+
+  .agents { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .agent { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); opacity: 0.45; }
+  .agent.on { opacity: 1; color: #05142b; background: var(--ac); border-color: var(--ac); box-shadow: 0 0 10px color-mix(in srgb, var(--ac) 55%, transparent); }
+  .note { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+
+  .section-title { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 18px; }
+  .pill { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+  .pill.expected { background: color-mix(in srgb, var(--sky) 16%, transparent); color: var(--sky); border: 1px solid var(--sky); }
+  .pill.actual { background: color-mix(in srgb, var(--ice) 12%, transparent); color: var(--ice); border: 1px solid var(--ice); }
+  h3 { font-size: 14px; margin: 16px 0 8px; color: var(--ice); }
+  h3:first-of-type { margin-top: 4px; }
+
+  ol.deleg { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  ol.deleg li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); }
+  ol.deleg li.dim { opacity: 0.38; }
+  ol.deleg .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 12px; background: var(--line); }
+  ol.deleg li.mine .n { background: var(--c); color: #05142b; }
+  .arrow { font-weight: 700; }
+  .tags { margin-left: 6px; font-size: 11px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+  ul.facts { margin: 0; padding-left: 18px; } ul.facts li { margin: 3px 0; }
+  .status { display: inline-block; font-weight: 800; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--sc); color: var(--sc); background: color-mix(in srgb, var(--sc) 14%, transparent); }
+
+  details.runwide { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); }
+  details.runwide summary { cursor: pointer; padding: 10px 14px; font-weight: 700; color: var(--sky); }
+  details.runwide .body { padding: 0 14px 12px; }
+  .cash { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-family: ui-monospace, Menlo, monospace; font-weight: 700; }
+  .cash .amt { padding: 4px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); }
+  .cash .amt.low { border-color: var(--danger); color: var(--danger); }
+  .cash small { color: var(--muted); font-family: system-ui, sans-serif; font-weight: 500; }
+
+  .actual { margin-top: 16px; border: 2px dashed var(--line); background: transparent; }
+  .actual .empty { color: var(--muted); font-style: italic; margin: 0; }
+  .actual { border-style: solid; border-color: color-mix(in srgb, var(--ice) 35%, var(--line)); background: var(--panel); }
+  ol.deleg li.refused .n { background: var(--danger); color: #05142b; }
+  ol.deleg li.refused { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+  table.ledger th.num, table.ledger td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-family: ui-monospace, Menlo, monospace; }
+  table.ledger td.neg { color: var(--danger); font-weight: 700; }
+  table.ledger td.zero { color: var(--muted); }
+  table.ledger .sub { color: var(--muted); font-size: 12px; }
+  table.ledger tr.start td, table.ledger tr.end td { background: var(--panel2); }
+  table.ledger tr.end td { border-top: 2px solid var(--ok); }
+  table.ledger tr.end td.num b { color: var(--ok); font-size: 18px; }
+  .cash-check { margin-top: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--ok); background: color-mix(in srgb, var(--ok) 8%, transparent); display: grid; gap: 4px; font-size: 14px; }
+  .refl { display: grid; gap: 16px; }
+  .refl p { margin: 0 0 14px; line-height: 1.7; font-size: 15.5px; max-width: 900px; }
+  .grades { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+  .grade-card { background: var(--panel2); border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: 14px; padding: 12px 14px; }
+  .grade-head { display: flex; justify-content: space-between; align-items: center; }
+  .gid { font-size: 22px; font-weight: 800; color: var(--c); }
+  .grade { font-weight: 900; font-size: 18px; padding: 2px 12px; border-radius: 999px; color: var(--gc); border: 1px solid var(--gc); background: color-mix(in srgb, var(--gc) 12%, transparent); }
+  ul.compare { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  ul.compare li { display: grid; grid-template-columns: 96px 1fr; gap: 10px; padding: 7px 10px; border-radius: 10px; background: var(--panel2); border: 1px solid var(--line); font-size: 14px; }
+  ul.compare li span { font-size: 12px; font-weight: 800; letter-spacing: 0.04em; }
+  ul.compare li.same span { color: var(--ok); }
+  ul.compare li.diff span { color: var(--warn); }
+  .soon { text-align: center; padding: 60px 20px; }
+  .soon h2 { font-size: 22px; letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .soon p { color: var(--muted); }
+  footer { margin-top: 28px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">HW5 · Campus Customs multi-agent desk · Problem 6</div>
+    <h1>Ticket Desk <span>Plan</span></h1>
+    <p>What we expect the agent team to do on each open ticket before we run it. Shop "today" is
+      <code>desk.date_today</code> = 2026-08-31. Each ticket only pulls in the specialists it needs:
+      the dimmed agents and delegations are deliberately <em>not</em> part of that ticket's plan.</p>
+  </header>
+  <div class="accent-bar"></div>
+
+  <div role="tablist" aria-label="Desk tabs" id="tabs"></div>
+  <div id="panels"></div>
+
+  <footer>Data: <code>data/campus_customs.db</code> (original) · Working copy for runs: <code>data/campus_customs_new.db</code> ·
+    Agents: <code>backend/agents/</code> · Tools: <code>mcp_server/server.py</code></footer>
+</div>
+
+<script>
+// ---------- The plan (single source of truth for every tab) ----------
+const AGENTS = {
+  Boss: '#bcd6ff', Facilities: '#9fb0cc', Inventory: '#63a4ff', Accounting: '#4f8fe0', 'Customer Service': '#8fb8ff',
+};
+
+const RUN_WIDE = {
+  opening: 'Boss starts with <code>list_open_tickets</code> and <code>get_cash_balance</code>, then calls Facilities first on 102. Rent comes first in the cash plan, so it should get confirmed and queued before the invoice.',
+  delegations: [
+    { from: 'Boss', to: 'Facilities', what: 'check the 102 notice against lease 1', tickets: [102] },
+    { from: 'Facilities', to: 'Accounting', what: 'queue the rent', tickets: [102] },
+    { from: 'Boss', to: 'Inventory', what: '101 and 103 together (same vendor)', tickets: [101, 103] },
+    { from: 'Inventory', to: 'Accounting', what: 'invoice 501 is blocking the restock, queue it after rent', tickets: [101, 103] },
+    { from: 'Boss', to: 'Accounting', what: 'margin on the 103 price', tickets: [103] },
+    { from: 'Boss', to: 'Customer Service', what: 'drafts for 101 and 103', tickets: [101, 103] },
+  ],
+  rules: ['Nobody should delegate back to the Boss.', '<code>approve_payment</code> never gets called.', 'Nothing actually gets paid.'],
+  cash: [
+    { amt: '$3,400', label: 'checking today' },
+    { amt: '$1,000', label: 'after rent ($2,400)' },
+    { amt: '$160', label: 'after invoice 501 ($840)', low: true },
+  ],
+  tools: [
+    ['Boss', 'list_open_tickets, get_cash_balance, list_approval_queue, update_ticket'],
+    ['Facilities', 'get_lease'],
+    ['Inventory', 'check_stock_and_price, list_vendors, get_invoice_status'],
+    ['Accounting', 'get_cash_balance, list_invoices, check_stock_and_price, queue_payment (x2)'],
+    ['Customer Service', 'save_customer_draft (x2)'],
+  ],
+};
+
+const STATUS_COLORS = { 'waiting on approval': '#f0b54a', 'needs human': '#ff6b7a', resolved: '#5fd39a', blocked: '#ff6b7a', open: '#63a4ff' };
+
+// ---------- What actually happened: run 20261014T212032-d36dbf ("Run all with Boss", 2026-10-14) ----------
+const RUN_ACTUAL = {
+  id: '20261014T212032-d36dbf',
+  stats: '134 s · 35 model calls · 96,804 tokens · 9 hand-offs + 1 refused',
+  opening: 'Boss started with <code>list_open_tickets</code>, <code>get_cash_balance</code> and <code>list_approval_queue</code>, then sent Inventory, Facilities and Accounting off at the same time (2.6 s in), not Facilities first. Invoice 501 got queued before rent, because there was enough cash for both.',
+  delegations: [
+    { from: 'Boss', to: 'Inventory', what: '101 and 103 together (same vendor)', tickets: [101, 103] },
+    { from: 'Boss', to: 'Facilities', what: 'check the 102 notice against lease 1', tickets: [102] },
+    { from: 'Boss', to: 'Accounting', what: 'margin on the 103 price, plus the 102 rent', tickets: [103, 102] },
+    { from: 'Accounting', to: 'Facilities', what: 'rent amount and due date for lease 1 (not in the plan)', tickets: [102] },
+    { from: 'Facilities', to: 'Accounting', what: 'queue the rent', tickets: [102] },
+    { from: 'Inventory', to: 'Accounting', what: 'invoice 501 is blocking the restock, queue it', tickets: [101] },
+    { from: 'Accounting', to: 'Facilities', what: 'rent amount again: refused by the depth limit (Boss → Inventory → Accounting)', tickets: [102], refused: true },
+    { from: 'Boss', to: 'Customer Service', what: 'draft for 101', tickets: [101] },
+    { from: 'Boss', to: 'Customer Service', what: 'draft for 103', tickets: [103] },
+    { from: 'Boss', to: 'Accounting', what: 'double-check that rent and invoice 501 really got paid (not in the plan)', tickets: [101, 102] },
+  ],
+  rules: [
+    '✓ Nobody delegated back to the Boss.',
+    '✓ No agent called <code>approve_payment</code>. Madison BOSS called it twice from the board popup.',
+    '✗ Two payments actually got paid (the plan said none). The run now waits for the human\'s APPROVE / DENY, and both were approved.',
+  ],
+  cash: [
+    { amt: '$3,400', label: 'checking today' },
+    { amt: '$2,560', label: 'after invoice 501 ($840)' },
+    { amt: '$160', label: 'after rent ($2,400)', low: true },
+  ],
+  tools: [
+    ['Boss', 'list_open_tickets, get_cash_balance (x2), list_approval_queue (x2), update_ticket (x3)'],
+    ['Facilities', 'list_open_tickets, get_lease (x2)'],
+    ['Inventory', 'check_stock_and_price (x2), list_vendors, get_invoice_status (x2)'],
+    ['Accounting', 'list_open_tickets (x4), get_cash_balance (x3), list_invoices (x3), list_approval_queue (x3), check_stock_and_price, get_invoice_status, queue_payment (x2)'],
+    ['Customer Service', 'list_open_tickets (x2), save_customer_draft (x2)'],
+    ['Human', 'approve_payment (x2, from the board)'],
+  ],
+};
+
+const ACTUAL = {
+  101: {
+    agents: ['Boss', 'Inventory', 'Accounting', 'Customer Service'],
+    outcome: [
+      'Tee S is out of stock (0 of 1).',
+      'Restock was blocked by invoice 501 ($840, 3 days overdue). Accounting queued it and Madison BOSS approved it 13 s later, so the vendor can ship again.',
+      'Arrives 9/5 if a restock is ordered today. There is no order tool, so that date isn\'t confirmed.',
+      'Draft asks Tauhid whether they want to wait.',
+    ],
+    tools: [
+      ['Inventory', 'check_stock_and_price, list_vendors, get_invoice_status (x2)'],
+      ['Accounting', 'get_invoice_status, list_invoices, queue_payment (invoice 501, queued first)'],
+      ['Customer Service', 'save_customer_draft'],
+      ['Boss', 'update_ticket'],
+      ['Human', 'approve_payment (request #1)'],
+    ],
+    status: 'resolved',
+    statusNote: 'Boss left it open (waiting on Tauhid\'s reply); a human marked it resolved after the run',
+    compare: [
+      ['same', 'Out of stock, blocked by invoice 501 ($840, 3 days overdue), arrives 9/5.'],
+      ['same', 'Inventory, Accounting and Customer Service worked it. Facilities stayed off.'],
+      ['diff', 'The invoice got approved during the run, so it ended open (waiting on the customer), not waiting on approval.'],
+    ],
+  },
+  102: {
+    agents: ['Boss', 'Facilities', 'Accounting'],
+    outcome: [
+      'Matches the lease: Elm City Properties, $2,400 due 9/2.',
+      'Not a scam.',
+      'Rent was queued second, after invoice 501. Madison BOSS approved it and checking went to $160.',
+    ],
+    tools: [
+      ['Facilities', 'get_lease (x2)'],
+      ['Accounting', 'queue_payment (rent, queued second)'],
+      ['Boss', 'update_ticket'],
+      ['Human', 'approve_payment (request #2)'],
+    ],
+    status: 'resolved',
+    statusNote: 'rent paid',
+    compare: [
+      ['same', 'Matches the lease, $2,400 due 9/2, not a scam. Only Facilities and Accounting worked it.'],
+      ['diff', 'Facilities wasn\'t called first, and rent was queued after the invoice (there was cash for both).'],
+      ['diff', 'Accounting asked Facilities for the rent amount on its own (extra hand-off), and a second ask was refused by the depth limit.'],
+      ['diff', 'Approved during the run, so it ended resolved, not waiting on approval.'],
+    ],
+  },
+  103: {
+    agents: ['Boss', 'Inventory', 'Accounting', 'Customer Service'],
+    outcome: [
+      '8 hoodies in stock, short 12.',
+      'Boss picked $50 each, above the $22 cost ($28 margin per hoodie, $560 on all 20).',
+      'There\'s no cost or PO tool for the 12 reprint, so 9/5 isn\'t confirmed.',
+      'Draft asks the club to OK $50 and choose 8 now + 12 later, or wait for all 20.',
+    ],
+    tools: [
+      ['Inventory', 'check_stock_and_price'],
+      ['Accounting', 'check_stock_and_price (margin)'],
+      ['Customer Service', 'save_customer_draft'],
+      ['Boss', 'update_ticket'],
+    ],
+    status: 'resolved',
+    statusNote: 'Boss left it open (waiting on the club\'s OK); a human marked it resolved after the run',
+    compare: [
+      ['same', '8 in stock, short 12, price above $22 cost, no PO tool for the reprint.'],
+      ['same', 'Inventory, Accounting and Customer Service worked it. Facilities stayed off.'],
+      ['diff', 'Ended open instead of needs human. Same meaning: tickets are now only open or resolved.'],
+    ],
+  },
+};
+
+const TICKETS = [
+  {
+    id: 101, color: '#63a4ff', type: 'customer_order', subject: 'Bulldog tee', requester: 'Tauhid Zaman',
+    facts: [['Wants', '1 × <code>CC-TEE-WHITE</code>, size S'], ['Linked', 'invoice <code>501</code>'], ['Note', 'Needs a tee in size S.'], ['Opened', '2026-08-31 09:15']],
+    agents: ['Boss', 'Inventory', 'Accounting', 'Customer Service'],
+    outcome: [
+      'Tee S is out of stock.',
+      'Restock is blocked by invoice 501 ($840, 3 days overdue).',
+      'Arrives 9/5 if paid today.',
+    ],
+    tools: [
+      ['Inventory', 'check_stock_and_price, list_vendors, get_invoice_status'],
+      ['Accounting', 'queue_payment (invoice 501, after rent)'],
+      ['Customer Service', 'save_customer_draft'],
+      ['Boss', 'update_ticket'],
+    ],
+    status: 'waiting on approval',
+  },
+  {
+    id: 102, color: '#bcd6ff', type: 'rent_notice', subject: 'Rent due', requester: 'Elm City Properties',
+    facts: [['Linked', 'lease <code>1</code>'], ['Note', 'Email: shop rent due in 2 days.'], ['Amount', 'not stated in the email'], ['Opened', '2026-08-31 11:05']],
+    agents: ['Boss', 'Facilities', 'Accounting'],
+    outcome: [
+      'Matches the lease.',
+      '$2,400 due 9/2.',
+      'Not a scam.',
+    ],
+    tools: [
+      ['Facilities', 'get_lease'],
+      ['Accounting', 'queue_payment (rent, first)'],
+      ['Boss', 'update_ticket'],
+    ],
+    status: 'waiting on approval',
+  },
+  {
+    id: 103, color: '#286dc0', type: 'price_override', subject: 'Bulk hoodie discount', requester: 'Yale AI Club',
+    facts: [['Wants', '20 × <code>CC-HOOD-NAVY</code>, size M'], ['Asks for', 'a bulk discount'], ['Note', 'Student org wants 20 hoodies, size M, asking for a bulk discount.'], ['Opened', '2026-08-31 16:55']],
+    agents: ['Boss', 'Inventory', 'Accounting', 'Customer Service'],
+    outcome: [
+      '8 hoodies in stock, short 12.',
+      'Price has to stay above $22 cost.',
+      "There's no cost or PO tool for the 12 reprint, so it's needs human.",
+    ],
+    tools: [
+      ['Inventory', 'check_stock_and_price'],
+      ['Accounting', 'check_stock_and_price (margin)'],
+      ['Customer Service', 'save_customer_draft'],
+      ['Boss', 'update_ticket'],
+    ],
+    status: 'needs human',
+  },
+];
+
+// ---------- Rendering ----------
+const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const agentChips = (on) => Object.entries(AGENTS).map(([name, c]) =>
+  `<span class="agent ${on.includes(name) ? 'on' : ''}" style="--ac:${c}">${name}</span>`).join('');
+const COLOR = { ...AGENTS, Human: '#ffffff' };
+const toolRows = (rows) => rows.map(([a, t]) =>
+  `<tr><td style="color:${COLOR[a]};font-weight:700;white-space:nowrap">${a}</td><td>${t.split(/, (?![^(]*\))/).map((x) => `<code>${x}</code>`).join(' ')}</td></tr>`).join('');
+
+function delegationList(ticketId, list = RUN_WIDE.delegations) {
+  return list.map((d, i) => {
+    const mine = ticketId == null || d.tickets.includes(ticketId);
+    return `<li class="${mine ? 'mine' : 'dim'} ${d.refused ? 'refused' : ''}"><span class="n">${i + 1}</span><span>
+      <span class="arrow" style="color:${AGENTS[d.from]}">${d.from}</span> → <span class="arrow" style="color:${AGENTS[d.to]}">${d.to}</span>:
+      ${d.what}<span class="tags">${d.tickets.map((t) => '#' + t).join(' ')}</span></span></li>`;
+  }).join('');
+}
+
+function runWide(ticketId) {
+  return `<details class="runwide"><summary>Run-wide expectations (all tickets)</summary><div class="body">
+    <h3>Opening moves</h3><p style="margin:0">${RUN_WIDE.opening}</p>
+    <h3>All expected delegations, in order</h3><ol class="deleg">${delegationList(ticketId)}</ol>
+    <h3>Cash plan</h3><div class="cash">${RUN_WIDE.cash.map((c, i) =>
+      `${i ? '→' : ''}<span class="amt ${c.low ? 'low' : ''}">${c.amt}</span><small>${c.label}</small>`).join(' ')}</div>
+    <h3>Ground rules</h3><ul class="facts">${RUN_WIDE.rules.map((r) => `<li>${r}</li>`).join('')}</ul>
+    <h3>Expected tools for the whole run</h3><table><tbody>${toolRows(RUN_WIDE.tools)}</tbody></table>
+  </div></details>`;
+}
+
+function runWideActual(ticketId) {
+  const A = RUN_ACTUAL;
+  return `<details class="runwide"><summary>Run-wide actuals (all tickets) · ${A.stats}</summary><div class="body">
+    <h3>Opening moves</h3><p style="margin:0">${A.opening}</p>
+    <h3>All actual delegations, in order</h3><ol class="deleg">${delegationList(ticketId, A.delegations)}</ol>
+    <h3>Cash</h3><div class="cash">${A.cash.map((c, i) =>
+      `${i ? '→' : ''}<span class="amt ${c.low ? 'low' : ''}">${c.amt}</span><small>${c.label}</small>`).join(' ')}</div>
+    <h3>Ground rules</h3><ul class="facts">${A.rules.map((r) => `<li>${r}</li>`).join('')}</ul>
+    <h3>Actual tools for the whole run</h3><table><tbody>${toolRows(A.tools)}</tbody></table>
+    <p class="note">From <code>output/audit_trail.json</code>, run <code>${A.id}</code>.</p>
+  </div></details>`;
+}
+
+function actualPanel(t) {
+  const a = ACTUAL[t.id];
+  const mine = RUN_ACTUAL.delegations.filter((d) => d.tickets.includes(t.id)).length;
+  return `
+        <div class="section-title"><span class="pill actual">Actual</span> What the team really did on #${t.id}</div>
+        <h3>Agents that worked it</h3>
+        <div class="agents">${agentChips(a.agents)}</div>
+        <h3>Delegations for this ticket (${mine} of ${RUN_ACTUAL.delegations.length})</h3>
+        <ol class="deleg">${delegationList(t.id, RUN_ACTUAL.delegations)}</ol>
+        <h3>Actual outcome</h3>
+        <ul class="facts">${a.outcome.map((o) => `<li>${o}</li>`).join('')}</ul>
+        <h3>Actual tool calls</h3>
+        <table><tbody>${toolRows(a.tools)}</tbody></table>
+        <h3>Actual status</h3>
+        <span class="status" style="--sc:${STATUS_COLORS[a.status]}">${a.status}</span> <span class="note" style="margin-left:6px">${a.statusNote}</span>
+        <h3>Expected vs. actual</h3>
+        <ul class="compare">${a.compare.map(([k, txt]) => `<li class="${k}"><span>${k === 'same' ? '✓ same' : '≠ different'}</span>${txt}</li>`).join('')}</ul>
+        ${runWideActual(t.id)}`;
+}
+
+function ticketPanel(t) {
+  const sc = STATUS_COLORS[t.status];
+  const mineCount = RUN_WIDE.delegations.filter((d) => d.tickets.includes(t.id)).length;
+  return `
+  <div class="grid">
+    <aside class="card ticket-card" style="--c:${t.color}">
+      <div class="id">#${t.id}</div>
+      <div class="type">${t.type}</div>
+      <div style="font-weight:700;margin-top:6px">${t.subject}</div>
+      <dl><dt>From</dt><dd>${t.requester}</dd>${t.facts.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+      <h2 style="margin-top:16px">Agents on this ticket</h2>
+      <div class="agents">${agentChips(t.agents)}</div>
+      <p class="note">${t.agents.length - 1} of 4 specialists. Dimmed agents stay off this ticket.</p>
+    </aside>
+    <div>
+      <section class="card" style="--c:${t.color}">
+        <div class="section-title"><span class="pill expected">Expected</span> What the team should do on #${t.id}</div>
+        <h3>Delegations for this ticket (${mineCount} of 6)</h3>
+        <ol class="deleg">${delegationList(t.id)}</ol>
+        <h3>Expected outcome</h3>
+        <ul class="facts">${t.outcome.map((o) => `<li>${o}</li>`).join('')}</ul>
+        <h3>Expected tool calls</h3>
+        <table><tbody>${toolRows(t.tools)}</tbody></table>
+        <h3>Expected status</h3>
+        <span class="status" style="--sc:${sc}">${t.status}</span>
+        ${runWide(t.id)}
+      </section>
+      <section class="card actual" style="--c:${t.color}" aria-label="Actual results for ticket ${t.id}">
+        ${actualPanel(t)}
+      </section>
+    </div>
+  </div>`;
+}
+
+const LEDGER = {
+ "start": 3400.0,
+ "end": 160.0,
+ "end_date": "2026-08-31",
+ "total_paid": 3240.0,
+ "rows": [
+  {
+   "ticket": 101,
+   "subject": "Bulldog tee",
+   "what": "Paid invoice 501 (Rush reprint CC-TEE-WHITE S, due 2026-08-28, 3 days overdue) so the vendor would ship the restock.",
+   "payee": "Bulldog Print Co",
+   "approval": "request #1, queued by Accounting, approved by Madison BOSS",
+   "amount": -840.0,
+   "after": 2560.0,
+   "paid_at": "2026-08-31"
+  },
+  {
+   "ticket": 102,
+   "subject": "Rent due",
+   "what": "Paid rent for lease 1 (Chapel Street shop), due 2026-09-02; amount from the lease, not the email.",
+   "payee": "Elm City Properties",
+   "approval": "request #2, queued by Accounting, approved by Madison BOSS",
+   "amount": -2400.0,
+   "after": 160.0,
+   "paid_at": "2026-08-31"
+  },
+  {
+   "ticket": 103,
+   "subject": "Bulk hoodie discount",
+   "what": "No payment. The Boss quoted a price ($50 × 20 hoodies) to the customer; no purchase order (no PO tool), and revenue isn't modeled.",
+   "payee": "—",
+   "approval": "—",
+   "amount": 0.0,
+   "after": 160.0
+  }
+ ],
+ "unpaid_requests": [],
+ "payments_rows": 2,
+ "order_note": "Payments happened in this order during the run: invoice 501 first (approved 21:20:51), then rent (21:21:04)."
+};
+
+const usd = (n) => (n < 0 ? '−' : '') + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function cashPanel() {
+  const L = LEDGER;
+  const checkLine = `${usd(L.start)} − ${L.rows.filter((r) => r.amount < 0).map((r) => usd(-r.amount)).join(' − ')} = ${usd(L.start - L.total_paid)}`;
+  return `
+  <div class="card cash-tab">
+    <div class="section-title"><span class="pill actual">Actual</span> Where the money went · run <code>20261014T212032-d36dbf</code></div>
+    <p class="note" style="margin:0 0 14px">Checking account only. Cash only goes out in this shop (no revenue is modeled), and every payment needed a human approval.</p>
+    <table class="ledger">
+      <thead><tr><th>Ticket</th><th>What happened and why</th><th>Paid to</th><th>Approval</th><th class="num">Change</th><th class="num">Checking after</th></tr></thead>
+      <tbody>
+        <tr class="start"><td colspan="5"><b>Starting checking</b> after the reset (original <code>campus_customs.db</code>, <code>cash_accounts.checking</code>)</td><td class="num"><b>${usd(L.start)}</b></td></tr>
+        ${L.rows.map((r) => `<tr>
+          <td><b>#${r.ticket}</b><div class="sub">${r.subject}</div></td>
+          <td>${r.what}</td>
+          <td>${r.payee}</td>
+          <td class="sub">${r.approval}</td>
+          <td class="num ${r.amount < 0 ? 'neg' : 'zero'}">${r.amount === 0 ? '$0.00' : usd(r.amount)}</td>
+          <td class="num">${usd(r.after)}</td></tr>`).join('')}
+        <tr class="end"><td colspan="5"><b>Ending checking</b>, matches <code>cash_accounts</code> in <code>campus_customs_new.db</code> (checking, as of ${L.end_date})</td><td class="num"><b>${usd(L.end)}</b></td></tr>
+      </tbody>
+    </table>
+    <div class="cash-check">
+      <div><b>Math check:</b> ${checkLine} ✓</div>
+      <div>Total paid out: <b>${usd(L.total_paid)}</b> in ${L.payments_rows} rows of the <code>payments</code> table. Pending or declined requests: <b>${L.unpaid_requests.length || 'none'}</b>.</div>
+      <div>${L.order_note}</div>
+      <div>Compared with the plan: expected $3,400 → $1,000 (rent) → $160 (invoice). Same ending balance; the invoice was just paid before the rent.</div>
+    </div>
+  </div>`;
+}
+
+// ---------- Reflection (written in my own words) ----------
+const REFLECTION_PARAGRAPHS = [
+  `Overall I think the team did pretty well. Every number they gave was right and nobody made anything up, which was my biggest worry. I'd give 101 an A−: only Inventory, Accounting and Customer Service touched it, they caught that the size S tee was out of stock because invoice 501 ($840, 3 days overdue) was holding up the restock, queued just that bill, and waited for me to approve it before deciding anything. The draft to Tauhid didn't promise a date or spill anything about the vendor or our cash. 102 and 103 get a B+ from me. On 102 Facilities checked the notice against the lease and used the $2,400 from the lease instead of the email, but Accounting re-asked Facilities for the rent it had literally just been handed, and a second ask got blocked by the depth limit. On 103 the math was solid (8 of 20 in stock, $50 each is still $28 over the $22 cost, $560 total), but the Boss picked a 14% discount without any real policy behind it.`,
+  `Compared to what I expected, the facts lined up almost exactly: out of stock and blocked by 501 on 101, lease matches and not a scam on 102, 8 in stock and short 12 on 103, and the right agents on each ticket. What was different was the order and the ending. The Boss sent Inventory, Facilities and Accounting out all at once instead of starting with Facilities, and the invoice got queued before the rent (fine, since there was cash for both). Since I approved both payments during the run, cash went $3,400 → $2,560 → $160 instead of nothing getting paid, and the tickets ended open or resolved instead of "waiting on approval."`,
+  `Honestly, some of this would've been simpler with one agent and the tools. Rent is just get_lease and then queue_payment, and the hand-off from Facilities to Accounting mostly added a round trip and duplicate lookups. The price quote on 103 is basically a stock check, a price pick and a draft. Every extra agent re-reads the tickets and the cash (list_open_tickets got called 8 times!), and the Boss and Accounting burned about 73% of the 96,804 tokens. Where I'd keep the team is the shared cash plan across all the tickets, and the fact that only Accounting can queue a payment and only Customer Service writes drafts.`,
+  `With the tools we already built, this team could handle a customer asking for Crest Mugs (0 in stock, but Elm City Gifts has no unpaid invoice and a 3-day lead, so they'd show up 9/3), a fake rent notice asking for $3,000 (Facilities would see it doesn't match the $2,400 lease, flag it as a scam, and nothing gets paid), or a club wanting 30 Yale Caps at a discount (40 in stock, $6 cost vs $22 list, so there's tons of room to work with).`,
+  `What it couldn't do: actually order the 12-hoodie reprint, because there's no purchase order or restock cost. That would need a purchase_orders table with vendor quotes, a create_purchase_order tool behind human approval, and receive_shipment to add the stock when it lands. It also can't take the club's money or give a refund, since cash only goes out right now. That needs an orders table plus record_sale / charge_customer and refund_payment tools. And it can't send any of those drafts or read replies, because nothing emails and new requests only get in by editing the database. For that I'd add send_email behind an approval step, an inbox reader, and a create_ticket tool.`,
+];
+
+function reflectionPanel() {
+  return `
+  <section class="card refl">
+    <div class="section-title"><span class="pill actual">Reflection</span> My take on the run · <code>20261014T212032-d36dbf</code></div>
+    ${REFLECTION_PARAGRAPHS.map((p) => `<p>${p}</p>`).join('')}
+  </section>`;
+}
+const soon = (title, what) => `<div class="card soon"><h2>${title}</h2><p>Coming soon. ${what}</p></div>`;
+
+const TABS = [
+  ...TICKETS.map((t) => ({ key: String(t.id), label: `Ticket ${t.id}`, color: t.color, html: ticketPanel(t) })),
+  { key: 'cash', label: 'Cash', color: '#5fd39a', html: cashPanel() },
+  { key: 'reflection', label: 'Reflection', color: '#bcd6ff', html: reflectionPanel() },
+];
+
+const tablist = document.getElementById('tabs');
+const panels = document.getElementById('panels');
+TABS.forEach((tab, i) => {
+  const btn = el(`<button role="tab" id="tab-${tab.key}" aria-controls="panel-${tab.key}" class="${tab.later ? 'later' : ''}"
+      style="--c:${tab.color}"><span class="dot"></span>${tab.label}</button>`);
+  btn.addEventListener('click', () => select(tab.key));
+  tablist.appendChild(btn);
+  const panel = el(`<section role="tabpanel" id="panel-${tab.key}" aria-labelledby="tab-${tab.key}" tabindex="0"></section>`);
+  panel.innerHTML = tab.html;
+  panels.appendChild(panel);
+});
+
+function select(key) {
+  TABS.forEach((tab) => {
+    const on = tab.key === key;
+    const btn = document.getElementById(`tab-${tab.key}`);
+    btn.setAttribute('aria-selected', on);
+    btn.tabIndex = on ? 0 : -1;
+    document.getElementById(`panel-${tab.key}`).hidden = !on;
+  });
+  history.replaceState(null, '', `#${key}`);
+}
+
+// arrow keys move between tabs
+tablist.addEventListener('keydown', (e) => {
+  const i = TABS.findIndex((t) => document.getElementById(`tab-${t.key}`) === document.activeElement);
+  if (i < 0 || !['ArrowRight', 'ArrowLeft'].includes(e.key)) return;
+  const next = TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
+  select(next.key);
+  document.getElementById(`tab-${next.key}`).focus();
+});
+
+select(TABS.some((t) => t.key === location.hash.slice(1)) ? location.hash.slice(1) : '101');
+</script>
+</body>
+</html>

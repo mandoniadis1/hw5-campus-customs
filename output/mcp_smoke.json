@@ -1,0 +1,197 @@
+{
+  "server": "campus-customs",
+  "connection": {
+    "config": ".mcp.json",
+    "transport": "stdio",
+    "type": "stdio",
+    "command": "/Users/madison/.codex/my_app/hw5/mcp_server/.venv/bin/python",
+    "args": [
+      "/Users/madison/.codex/my_app/hw5/mcp_server/server.py"
+    ]
+  },
+  "database": "data/campus_customs_new.db",
+  "shop_date_today": "2026-08-31",
+  "tools_listed": [
+    "check_stock_and_price",
+    "get_invoice_status",
+    "get_lease"
+  ],
+  "all_checks_match": true,
+  "tests": [
+    {
+      "prompt": "How many hoodies are in size small? and what is the pricing",
+      "tool": "check_stock_and_price",
+      "arguments": {
+        "sku": "CC-HOOD-NAVY",
+        "size": "S"
+      },
+      "tool_output": {
+        "found": true,
+        "date_today": "2026-08-31",
+        "sku": "CC-HOOD-NAVY",
+        "name": "Basic Hoodie Big Yale",
+        "all_sizes": [
+          {
+            "size": "S",
+            "qty": 4,
+            "location": "Aisle A"
+          },
+          {
+            "size": "M",
+            "qty": 8,
+            "location": "Aisle A"
+          },
+          {
+            "size": "L",
+            "qty": 14,
+            "location": "Aisle A"
+          },
+          {
+            "size": "XL",
+            "qty": 6,
+            "location": "Aisle A"
+          }
+        ],
+        "pricing": {
+          "unit_cost": 22.0,
+          "list_price": 58.0
+        },
+        "max_discount_pct_above_cost": 62.1,
+        "size": "S",
+        "qty_in_stock": 4,
+        "location": "Aisle A"
+      },
+      "db_checks": [
+        {
+          "field": "qty_in_stock (size S)",
+          "tool": 4,
+          "db": 4,
+          "match": true
+        },
+        {
+          "field": "unit_cost",
+          "tool": 22.0,
+          "db": 22.0,
+          "match": true
+        },
+        {
+          "field": "list_price",
+          "tool": 58.0,
+          "db": 58.0,
+          "match": true
+        }
+      ],
+      "answer": "4 Basic Hoodie Big Yale hoodies in size S (Aisle A). List price $58.00, unit cost $22.00, so the most it can be discounted and still cover cost is 62.1%."
+    },
+    {
+      "prompt": "How many invoices do we have that are overdue and how many total? If we pay the overdue one are we in the clear?",
+      "tool": "get_invoice_status",
+      "arguments": {
+        "invoice_id": 501
+      },
+      "tool_output": {
+        "found": true,
+        "date_today": "2026-08-31",
+        "invoice": {
+          "id": 501,
+          "vendor_id": 1,
+          "amount": 840.0,
+          "due_date": "2026-08-28",
+          "status": "open",
+          "description": "Rush reprint CC-TEE-WHITE S"
+        },
+        "is_unpaid": true,
+        "days_overdue": 3,
+        "vendor": {
+          "id": 1,
+          "name": "Bulldog Print Co",
+          "specialty": "apparel reprint",
+          "lead_days": 5
+        },
+        "vendor_unpaid_invoices": [
+          {
+            "id": 501,
+            "amount": 840.0,
+            "due_date": "2026-08-28",
+            "status": "open",
+            "description": "Rush reprint CC-TEE-WHITE S"
+          }
+        ],
+        "vendor_unpaid_total": 840.0,
+        "vendor_will_ship": false,
+        "ship_blocked_reason": "Bulldog Print Co has 1 unpaid invoice(s) totaling $840.00 and won't ship until they're paid.",
+        "earliest_arrival_if_paid_today": "2026-09-05"
+      },
+      "db_checks": [
+        {
+          "field": "invoice amount",
+          "tool": 840.0,
+          "db": 840.0,
+          "match": true
+        },
+        {
+          "field": "days_overdue",
+          "tool": 3,
+          "db": 3,
+          "match": true
+        },
+        {
+          "field": "vendor unpaid invoices",
+          "tool": 1,
+          "db": 1,
+          "match": true
+        },
+        {
+          "field": "total invoices in db",
+          "tool": 1,
+          "db": 1,
+          "match": true
+        }
+      ],
+      "answer": "1 overdue out of 1 invoice(s) total: invoice 501, $840.00 to Bulldog Print Co, 3 days overdue. Paying it clears the vendor's only unpaid invoice, so they'll ship again (earliest arrival 2026-09-05). Cash would go from $3,400.00 to $2,560.00, but rent of $2,400.00 is due 2026-09-02, which would leave only $160.00. So we're clear on invoices, but cash is very tight.",
+      "limitations": "get_invoice_status looks up one invoice (and its vendor's other invoices); it can't list every invoice. The total count and the cash/rent figures come from the db_checks SQL, not from this tool. A list_invoices / get_cash_balance tool would let an agent answer this alone."
+    },
+    {
+      "prompt": "How much is our lease and when is it due?",
+      "tool": "get_lease",
+      "arguments": {
+        "lease_id": 1
+      },
+      "tool_output": {
+        "found": true,
+        "date_today": "2026-08-31",
+        "lease": {
+          "id": 1,
+          "space_name": "Chapel Street shop",
+          "landlord": "Elm City Properties",
+          "monthly_rent": 2400.0,
+          "next_due": "2026-09-02",
+          "notes": null
+        },
+        "days_until_due": 2,
+        "is_overdue": false
+      },
+      "db_checks": [
+        {
+          "field": "monthly_rent",
+          "tool": 2400.0,
+          "db": 2400.0,
+          "match": true
+        },
+        {
+          "field": "next_due",
+          "tool": "2026-09-02",
+          "db": "2026-09-02",
+          "match": true
+        },
+        {
+          "field": "days_until_due",
+          "tool": 2,
+          "db": 2,
+          "match": true
+        }
+      ],
+      "answer": "$2,400.00 a month to Elm City Properties for the Chapel Street shop, next due 2026-09-02: 2 days from the shop's today (2026-08-31)."
+    }
+  ]
+}

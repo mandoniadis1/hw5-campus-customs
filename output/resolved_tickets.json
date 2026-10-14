@@ -1,0 +1,126 @@
+{
+  "run_id": "20261014T212032-d36dbf",
+  "shop_date": "2026-08-31",
+  "model": "gpt-6-luna",
+  "cash": {
+    "start": 3400.0,
+    "end": 160.0,
+    "paid_out": 3240.0
+  },
+  "tickets": [
+    {
+      "id": 101,
+      "type": "customer_order",
+      "requester": "Tauhid Zaman",
+      "subject": "Bulldog tee",
+      "final_status": "resolved",
+      "boss_status_at_end_of_run": "open",
+      "outcome": "Tee S out of stock; invoice 501 ($840) approved and paid so the vendor can ship; arrives 9/5 if ordered (not confirmed). Customer asked whether to wait.",
+      "agents": {
+        "Boss": "Sent 101 and 103 to Inventory together (same vendor), had Customer Service draft the reply, and set the ticket's status.",
+        "Inventory": "Found tee S out of stock (0 of 1) and the restock blocked by unpaid invoice 501 ($840, 3 days overdue) at Bulldog Print Co (5-day lead time); flagged it to Accounting.",
+        "Accounting": "Confirmed invoice 501 was 3 days overdue, checked cash covered it with room for rent, and queued it for approval (request #1).",
+        "Customer Service": "Saved a 'DRAFT - NOT SENT' message telling Tauhid the tee could arrive 9/5 and asking whether they want to wait.",
+        "not_needed": [
+          "Facilities"
+        ]
+      },
+      "human_approvals": [
+        {
+          "request_id": 1,
+          "what": "Invoice 501",
+          "payee": "Bulldog Print Co",
+          "amount": 840.0,
+          "queued_by": "Accounting",
+          "decision": "paid",
+          "approved_by": "Madison BOSS",
+          "decided_at": "2026-10-14T21:20:51+00:00"
+        }
+      ],
+      "human_resolution": {
+        "by": "Madison (marked via Claude)",
+        "at": "2026-10-14T21:37:10.645+00:00",
+        "note": "closing for the hw5 board; no payment pending, customer draft saved (not sent)"
+      },
+      "customer_draft": "DRAFT - NOT SENT\nHi Tauhid, we estimate the size S white tee could arrive as early as September 5, 2026, if ordered today, but no restock order has been confirmed. Would you like to wait?",
+      "boss_numbers": [
+        "Requested quantity: 1, CC-TEE-WHITE size S (list_open_tickets).",
+        "Stock: 0; shortfall: 1 (Inventory).",
+        "Invoice 501: $840, paid; approval queue #1 (list_approval_queue, all; Accounting).",
+        "Earliest possible arrival is 2026-09-05 if ordered today; this is an estimate, not a confirmed order (Inventory)."
+      ]
+    },
+    {
+      "id": 102,
+      "type": "rent_notice",
+      "requester": "Elm City Properties",
+      "subject": "Rent due",
+      "final_status": "resolved",
+      "boss_status_at_end_of_run": "resolved",
+      "outcome": "Rent notice matched lease 1; $2,400 approved and paid; checking down to $160.",
+      "agents": {
+        "Boss": "Sent the rent notice to Facilities and set the ticket resolved once the rent was paid.",
+        "Facilities": "Checked the notice against lease 1: Elm City Properties, $2,400, due 9/2 (2 days away); not a scam. Asked Accounting to queue the rent.",
+        "Accounting": "Queued the $2,400 rent for approval (request #2), showing $160 left after both bills.",
+        "not_needed": [
+          "Inventory",
+          "Customer Service"
+        ]
+      },
+      "human_approvals": [
+        {
+          "request_id": 2,
+          "what": "Rent, lease 1",
+          "payee": "Elm City Properties",
+          "amount": 2400.0,
+          "queued_by": "Accounting",
+          "decision": "paid",
+          "approved_by": "Madison BOSS",
+          "decided_at": "2026-10-14T21:21:04+00:00"
+        }
+      ],
+      "human_resolution": {
+        "by": "Boss",
+        "note": "resolved by the Boss during the run after the payment was paid"
+      },
+      "customer_draft": null,
+      "boss_numbers": [
+        "Shop date: 2026-08-31 (list_open_tickets).",
+        "Lease 1 rent: $2,400 due 2026-09-02, not overdue (Facilities).",
+        "Rent payment: $2,400, approval queue #2, status paid (list_approval_queue, all; Accounting)."
+      ]
+    },
+    {
+      "id": 103,
+      "type": "price_override",
+      "requester": "Yale AI Club",
+      "subject": "Bulk hoodie discount",
+      "final_status": "resolved",
+      "boss_status_at_end_of_run": "open",
+      "outcome": "8 of 20 hoodies in stock (short 12); price set at $50 each (above $22 cost); offer drafted for the club's OK. No money moved.",
+      "agents": {
+        "Boss": "Sent the request to Inventory and Accounting, picked $50 per hoodie (above the $22 cost), and had Customer Service draft the offer.",
+        "Inventory": "Found 8 of 20 hoodies in size M (short 12); a reprint could arrive 9/5 but isn't ordered (no PO tool).",
+        "Accounting": "Gave the margin math: $58 list, $22 cost, so $50 leaves $28 per hoodie ($560 on 20). Nothing to pay.",
+        "Customer Service": "Saved a 'DRAFT - NOT SENT' offer to the Yale AI Club: $50 each, 8 now + 12 later or wait for all 20.",
+        "not_needed": [
+          "Facilities"
+        ]
+      },
+      "human_approvals": [],
+      "human_resolution": {
+        "by": "Madison (marked via Claude)",
+        "at": "2026-10-14T21:37:10.667+00:00",
+        "note": "closing for the hw5 board; no payment pending, customer draft saved (not sent)"
+      },
+      "customer_draft": "DRAFT - NOT SENT\nHi Yale AI Club,\n\nWe can offer the 20 CC-HOOD-NAVY hoodies in size M at $50 each. We have 8 available now; the remaining 12 could arrive as early as September 5 if ordered today, but that restock isn’t confirmed. Would you approve the $50 price, and would you prefer 8 now with the other 12 later, or to wait for all 20?\n\nThanks!",
+      "boss_numbers": [
+        "Requested quantity: 20 CC-HOOD-NAVY size M (list_open_tickets).",
+        "Stock: 8 available; shortfall: 12 (Inventory).",
+        "List price: $58 each; unit cost: $22 (Inventory; Accounting).",
+        "Selected price: $50 each, $28 margin per unit and $560 total margin on 20 (calculated from Inventory's cost/list price figures).",
+        "Possible restock arrival: 2026-09-05 if ordered today; not confirmed (Inventory)."
+      ]
+    }
+  ]
+}

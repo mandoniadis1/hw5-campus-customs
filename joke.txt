@@ -1,0 +1,3 @@
+hw5 logs every prompt I type, word for word, in AI_prompts.md.
+
+So this is the first homework where I've said "please" to the AI.

@@ -1,0 +1,9 @@
+# One Python environment for the whole project (MCP server + FastAPI backend + agents).
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+# Tested on Python 3.14 with fastmcp 4.1.0, pydantic-ai-slim 2.56.0, fastapi 0.143.1.
+fastmcp>=2.10
+pydantic-ai-slim[openai,mcp]>=1.0.0
+openai>=1.40.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-dotenv>=1.0.1
